@@ -13,12 +13,14 @@ from microbit import *
 import radio
 import utime
 
+VERSION = "1.0"
+DEBUG = False
+
 ##
 ## 初期設定
 ##
-VERSION = "1.0"
 CHANNEL = 1
-DEBUG = False
+TX_INTERVAL = 200   # 命令送信間隔
 
 def button_stats():
     """
@@ -58,4 +60,4 @@ while True:
     if DEBUG:
         uart.write("sending: ")
         uart.write("{},{},{},{}\r\n".format(bt, accl[0], accl[1], accl[2]))
-    sleep(200)
+    sleep(TX_INTERVAL)

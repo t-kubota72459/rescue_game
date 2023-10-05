@@ -1,12 +1,12 @@
 ##
 ## receiver.py
 ##
-## ロボットを操作してゴールを決めろ！
+## レスキューロボ受信側
 ##
 ## micro:bit 受信側プログラム
 ## 送られてきたメッセージを解釈し，決められた処理をする
 ##
-## Copyright (c) 2022 Hiroshima Politechnical College.
+## Copyright (c) 2022,2023 Hiroshima Politechnical College.
 ##
 
 import microbit
@@ -15,13 +15,15 @@ from k_motor import *
 import radio
 from utime import *
 
+VERSION = "1.0"
+DEBUG = False
+
 #
 # 初期設定
 #
 CHANNEL = 1
-VERSION = "1.0"
-DEBUG = True
 POWER = 80          # 出力値 (最大でここまで)
+ACTIVE_TIME = 250   # 旋回時のモーター ON 時間 (ms)
 
 def wait_msg():
     """
@@ -32,7 +34,6 @@ def wait_msg():
         s = radio.receive()
     return s
 
-
 def flush():
     """
     受信メッセージを読み捨てる
@@ -41,12 +42,11 @@ def flush():
     while s is not None:
        s = radio.receive()
 
-
 def search():
     """
     赤外線 LED 放射
     """
-    uart.write("search now!")
+    # uart.write("search now!")
     for _ in range(20):
         pin1.write_digital(1)
         pin1.write_digital(0)
@@ -100,9 +100,9 @@ while True:
     #
     if command == "B":      # ボタン・コマンド
         if msg[1] == "A":
-            rotate_left(r)
+            rotate_left(r, ACTIVE_TIME)
         elif msg[1] == "B":
-            rotate_right(r)
+            rotate_right(r, ACTIVE_TIME)
         elif msg[1] == "C":
             do_something()
     elif command == "A":    # 加速度センサー・コマンド
