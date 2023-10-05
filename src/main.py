@@ -67,7 +67,7 @@ tab_group_layout = [[sg.Tab('レスキューゲーム', tab1_layout, key='-TAB1-
 
 # The window layout - defines the entire window
 layout = [[sg.TabGroup(tab_group_layout, enable_events=True, key='-TABGROUP-')]]
-window = sg.Window('レスキューゲーム！', layout, font=("", 24), no_titlebar=True, resizable=True, size=(1024,520))
+window = sg.Window('レスキューゲーム！', layout, font=("", 24), no_titlebar=False, resizable=True, size=(1024,520))
 
 def update_display(_min, _sec):
     window['-TEXT1-'].update(f'{"%02d" % int(_min)}:{"%02d" % int(_sec)}')
@@ -88,9 +88,9 @@ def sec2str(_):
     _sec = _ % 60
     return f"{_min}分 {_sec}秒"
 
-def update_recode():
+def update_recode(remaining_time):
     global recode_list
-    _ = {"name": values["-INPUT1-"], "time":120 - int(game.rescue_time)}
+    _ = {"name": values["-INPUT1-"], "time":120 - int(remaining_time)}
     recode_list.append( _ )
     recode_list = sorted(recode_list, key=lambda x:x["time"])[:10]
     window["-TABLE-"].update([[v["name"], sec2str(v["time"])] for v in recode_list])
@@ -156,22 +156,27 @@ while True:
     ##
     if stat == s.ACTIVE:
         remaining_time = end_time - time.time()
-        _min, _sec = divmod(remaining_time, 60)
+        _min, _sec = divmod(max(remaining_time, 0), 60)
         update_display(_min, _sec)
 
+        ##
+        ## GAME OVER
+        ##
         if game.is_finished():
             if game.is_succeeded():
                 game.goal()
                 sg.popup_ok("おめでとう！！", font=("", 32))
-                update_recode()
+                update_recode(max(remaining_time, 0))
             else:
                 game.nogoal()
                 sg.popup_ok("ざんねん、もう一度トライしよう！", font=("", 32))
+            stat = s.IDLE
         elif remaining_time <= 0:
             game.over()
             sg.popup_ok("ざんねん！！\nゲームオーバー！！", font=("", 32))
-            update_recode()
-        stat = s.IDLE
+            update_recode(max(remaining_time, 0))
+            stat = s.IDLE
+
 repeater.cancel()
 game.cleanup()
 window.close()
