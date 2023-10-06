@@ -79,7 +79,6 @@ def init_display():
 
     window["-NAME-"].update( f'がんばれ！{values["-INPUT1-"]} 隊員！') 
     window['-TEXT1-'].update( f'{"%02d" % 2}:{"%02d" % 0}' )
-    window['-LIFE-'].update( f'{game.get_life()}' )
     window['-START-'].update( disabled=False )
     return True
 
@@ -114,6 +113,7 @@ while True:
         if event == "-REGIST-" and window["-INPUT1-"]:
             if init_display():
                 game.set_life()
+                window['-LIFE-'].update( f'{game.get_life()}' )
                 stat = s.INIT
         ##
         ## arduino SOUND TEST
@@ -140,6 +140,7 @@ while True:
         if event == "-REGIST-" and window["-INPUT1-"]:  ## なまえの再登録 (うわがき)
             if init_display():
                 game.set_life()
+                window['-LIFE-'].update( f'{game.get_life()}' )
         if event == "-START-":
             game.run()
             sg.popup_auto_close("救助開始！\n", auto_close=True, auto_close_duration=1, font=("", 32))
