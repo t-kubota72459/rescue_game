@@ -11,6 +11,7 @@ import time
 import arduino
 import repeater
 import game
+import visitor
 
 ##
 ## 状態遷移
@@ -47,7 +48,9 @@ tab2_layout = [
 
 tab3_layout = [
         [sg.Text('生存者の場所', size=(20,1))],
-        [sg.Text('_'*20, size=(20,1), key="-LIFE-")]
+        [sg.Text('_'*20, size=(20,1), key="-LIFE-")],
+        [sg.Text('来場者', size=(20,1))],
+        [sg.Text('_'*20, size=(20,1), key="-VISITOR-")],
         ]
 
 tab4_layout = [
@@ -171,11 +174,14 @@ while True:
             else:
                 game.nogoal()
                 sg.popup_ok("ざんねん、もう一度トライしよう！", font=("", 32))
+            window['-VISITOR-'].update(str(visitor.oneup()))
             stat = s.IDLE
+
         elif remaining_time <= 0:
             game.over()
             sg.popup_ok("ざんねん！！\nゲームオーバー！！", font=("", 32))
             update_recode(max(remaining_time, 0))
+            window['-VISITOR-'].update(str(visitor.oneup()))
             stat = s.IDLE
 
 repeater.cancel()
