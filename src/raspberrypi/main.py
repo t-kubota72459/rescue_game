@@ -16,14 +16,11 @@ import visitor
 ##
 ## 状態遷移
 ##
-class s: IDLE = 0; INIT = 1; READY = 2;  ACTIVE = 3; ERROR = 4;
-stat = s.IDLE
+class s: IDLE = 0; INIT = 1; READY = 2;  ACTIVE = 3; FIN_TIMEOVER = 4; FIN_SUCC = 5; FIN_FAIL = 6; ERROR = 7;
 
 ## ゲーム
 game = game.Game()
 
-## BGM 時間
-downcounter = 100 # 10 sec. till BGM starts
 
 ## スコア記録
 recode_list = []
@@ -80,7 +77,7 @@ def init_display():
         sg.popup_ok("セッティングを確認してください\n" + game.field.dump(), font=("", 16))
         return False
 
-    window["-NAME-"].update( f'がんばれ！{values["-INPUT1-"]} 隊員！') 
+    window["-NAME-"].update( f'がんばれ！ {values["-INPUT1-"]}隊員！') 
     window['-TEXT1-'].update( f'{"%02d" % 2}:{"%02d" % 0}' )
     window['-START-'].update( disabled=False )
     return True
@@ -99,6 +96,12 @@ def update_recode(remaining_time):
     window["-BEST-NAME-"].update(recode_list[0]["name"])
     window["-BEST-TIME-"].update(sec2str(recode_list[0]["time"]))
 
+##
+## 初期状態
+##
+stat = s.IDLE
+downcounter = 100 # 10 sec. till BGM starts (BGM までの時間)
+
 while True:
     event, values = window.read(timeout=100)
     ## print(event, values)
@@ -107,47 +110,41 @@ while True:
     if event == sg.WIN_CLOSED:
         break
 
-    ## 呼び込み BGM STOP
-    if event != "__TIMEOUT__":
-        repeater.cancel()
-        downcounter = 100
-
     if stat == s.IDLE:
-        if event == "-REGIST-" and window["-INPUT1-"]:
+        if event == "-REGIST-":
             if init_display():
                 game.set_life()
                 window['-LIFE-'].update( f'{game.get_life()}' )
                 stat = s.INIT
-        ##
-        ## arduino SOUND TEST
-        ##
-        if event == "-VOLUP-":
+        elif event == "-VOLUP-":
             arduino.up()
-        if event == "-VOLDOWN-":
+        elif event == "-VOLDOWN-":
             arduino.down()
-        if event == "-PREV-":
+        elif event == "-PREV-":
             arduino.prev()
-        if event == "-NEXT-":
+        elif event == "-NEXT-":
             arduino.next()
-        if event == "-STOP-":
+        elif event == "-STOP-":
             arduino.stop()
-        if not arduino.busy():
+        elif event == "__TIMEOUT__":
             downcounter -= 1
-            if downcounter == 0:
-                repeater.start()
+            if downcounter <= 0 and not arduino.busy():
+                arduino.play(6)
+                downcounter = 100
 
     ##
     ## GAME START
     ##
     if stat == s.INIT:
-        if event == "-REGIST-" and window["-INPUT1-"]:  ## なまえの再登録 (うわがき)
+        if event == "-REGIST-":  ## なまえの再登録 (うわがき)
             if init_display():
                 game.set_life()
                 window['-LIFE-'].update( f'{game.get_life()}' )
-        if event == "-START-":
+        elif event == "-START-":
             game.run()
             sg.popup_auto_close("救助開始！\n", auto_close=True, auto_close_duration=1, font=("", 32))
             stat = s.READY
+
     ##
     ## ROBO MOVE
     ##
@@ -155,6 +152,7 @@ while True:
         end_time = time.time() + game.rescue_time
         if game.field.is_started(): ## Robo moved
             stat = s.ACTIVE
+
     ##
     ## PLAYING
     ##
@@ -163,26 +161,44 @@ while True:
         _min, _sec = divmod(max(remaining_time, 0), 60)
         update_display(_min, _sec)
 
-        ##
-        ## GAME OVER
-        ##
-        if game.is_finished():
-            if game.is_succeeded():
-                game.goal()
-                sg.popup_ok("おめでとう！！", font=("", 32))
-                update_recode(max(remaining_time, 0))
-            else:
-                game.nogoal()
-                sg.popup_ok("ざんねん、もう一度トライしよう！", font=("", 32))
-            window['-VISITOR-'].update(str(visitor.oneup()))
-            stat = s.IDLE
+        if remaining_time <= 0:
+            stat = s.FIN_TIMEOUVER
+        elif game.is_finished():
+            if game.is_succeeded(): ## 救出成功
+                stat = s.FIN_SUCC
+            else:                   ## 救出失敗
+                stat = s.FIN_FAIL
 
-        elif remaining_time <= 0:
-            game.over()
-            sg.popup_ok("ざんねん！！\nゲームオーバー！！", font=("", 32))
-            update_recode(max(remaining_time, 0))
-            window['-VISITOR-'].update(str(visitor.oneup()))
-            stat = s.IDLE
+    ##
+    ## TIME OVER
+    ##
+    if stat == s.FIN_TIMEOVER:
+        game.over()
+        sg.popup_auto_close("ざんねん！！\nゲームオーバー！！\n", auto_close=True, auto_close_duration=3, font=("", 32))
+        update_recode(max(remaining_time, 0))
+
+    ##
+    ## 救出成功
+    ##
+    if stat == s.FIN_SUCC:
+        game.goal()
+        sg.popup_auto_close("ゲームクリア！！\nおめでとう！！\n", auto_close=True, auto_close_duration=3, font=("", 32))
+        update_recode(max(remaining_time, 0))
+
+    ##
+    ## 救出失敗
+    ##
+    if stat == s.FIN_FAIL:
+        game.nogoal()
+        sg.popup_auto_close("ざんねん\nもう一度トライしよう！！", auto_close=True, auto_close_duration=3, font=("", 32))
+
+    ##
+    ## 終了時の共通処理
+    ##
+    if stat in (s.FIN_TIMEOVER, s.FIN_SUCC, s.FIN_FAIL):
+        window['-VISITOR-'].update(str(visitor.oneup()))
+        downcounter = 100
+        stat = s.IDLE
 
 repeater.cancel()
 game.cleanup()

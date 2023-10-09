@@ -13,12 +13,10 @@ def start():
     th.start()
 
 def repeat(num):
-    arduino.stop()
     while BACKGROUND:
         if not arduino.busy():
             arduino.play(num)
         time.sleep(1)
-    arduino.stop()
 
 def cancel():
     global BACKGROUND, th
@@ -35,8 +33,6 @@ def is_alive():
 
 if __name__ == '__main__':
     start()
-
-
     print("th:start")
 
     for _ in range(1):
