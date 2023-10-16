@@ -1,1 +1,2 @@
 # rescure_game
+test
