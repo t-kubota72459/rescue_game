@@ -27,6 +27,9 @@ recode_list = []
 best_recode = { "name": "",
                 "time": 0 }
 
+## 来場者記録ファイル
+fn = "/home/takaya/proj/rescue_game/src/raspberrypi/visitor.txt"
+
 ## 画面デザイン
 sg.theme('LightBlue')
 tab1_layout = [
@@ -47,7 +50,7 @@ tab3_layout = [
         [sg.Text('生存者の場所', size=(20,1))],
         [sg.Text('_'*20, size=(20,1), key="-LIFE-")],
         [sg.Text('来場者', size=(20,1))],
-        [sg.Text('_'*20, size=(20,1), key="-VISITOR-")],
+        [sg.Text(str(visitor.read(fn)), size=(20,1), key="-VISITOR-")],
         ]
 
 tab4_layout = [
@@ -104,13 +107,13 @@ downcounter = 100 # 10 sec. till BGM starts (BGM までの時間)
 
 while True:
     event, values = window.read(timeout=100)
-    ## print(event, values)
+    ## print(stat, event, values)
 
     ## 終了
     if event == sg.WIN_CLOSED:
         break
 
-    if stat == s.IDLE:
+    if stat == s.IDLE or stat == s.INIT:
         if event == "-REGIST-":
             if init_display():
                 game.set_life()
@@ -136,11 +139,7 @@ while True:
     ## GAME START
     ##
     if stat == s.INIT:
-        if event == "-REGIST-":  ## なまえの再登録 (うわがき)
-            if init_display():
-                game.set_life()
-                window['-LIFE-'].update( f'{game.get_life()}' )
-        elif event == "-START-":
+        if event == "-START-":
             game.run()
             sg.popup_auto_close("救助開始！\n", auto_close=True, auto_close_duration=1, font=("", 32))
             stat = s.READY
@@ -162,7 +161,7 @@ while True:
         update_display(_min, _sec)
 
         if remaining_time <= 0:
-            stat = s.FIN_TIMEOUVER
+            stat = s.FIN_TIMEOVER
         elif game.is_finished():
             if game.is_succeeded(): ## 救出成功
                 stat = s.FIN_SUCC
@@ -196,7 +195,7 @@ while True:
     ## 終了時の共通処理
     ##
     if stat in (s.FIN_TIMEOVER, s.FIN_SUCC, s.FIN_FAIL):
-        window['-VISITOR-'].update(str(visitor.oneup()))
+        window['-VISITOR-'].update(str(visitor.oneup(fn)))
         downcounter = 100
         stat = s.IDLE
 
