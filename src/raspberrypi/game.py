@@ -4,6 +4,8 @@ import arduino
 
 class Game:
     rescue_time = 120
+    search_result = [0, 0, 0]
+    name_table = ["フィールドＡ", "フィールドＢ", "フィールドＣ"]
 
     def __init__(self):
         self.field = field.Field(self)
@@ -19,24 +21,30 @@ class Game:
         ''' called from event trigger sensor'''
         print("caught trigger")
         if self.field.need_help(channel):
+            self.search_result[0] = 1
             arduino.play(7)
         else:
+            self.search_result[0] = -1
             arduino.play(3)
 
     def help_B(self, channel):
         ''' called from event trigger sensor'''
         print("caught trigger")
         if self.field.need_help(channel):
+            self.search_result[1] = 1
             arduino.play(8)
         else:
+            self.search_result[1] = -1
             arduino.play(3)
 
     def help_C(self, channel):
         ''' called from event trigger sensor'''
         print("caught trigger")
         if self.field.need_help(channel):
+            self.search_result[2] = 1
             arduino.play(9)
         else:
+            self.search_result[2] = -1
             arduino.play(3)
 
     def is_ready(self):
@@ -47,6 +55,19 @@ class Game:
 
     def is_succeeded(self):
         return self.field.is_succeeded()
+
+    def search(self):
+        try:
+            pos = self.search_result.index(-1)
+            self.serach_result[pos] = 0
+            return (name_table[pos], "なし")
+        except: ValueError
+            try:
+                pos = self.search_result.index(1)
+                self.serach_result[pos] = 0
+                return (name_table[pos], "あり！！")
+            except: ValueError
+                return (None, "")
 
     def run(self):
         arduino.play(1)

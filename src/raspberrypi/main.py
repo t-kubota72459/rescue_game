@@ -160,6 +160,10 @@ while True:
         _min, _sec = divmod(max(remaining_time, 0), 60)
         update_display(_min, _sec)
 
+        (pos, alive) = game.search()
+        if pos is not None:
+            sg.popup_auto_close(f"{pos} に生命反応 {alive}", auto_close=True, auto_close_duration=2, font("", 32), non_blocking=True, no_titlebar=True, keep_on_top=True)
+
         if remaining_time <= 0:
             stat = s.FIN_TIMEOVER
         elif game.is_finished():
