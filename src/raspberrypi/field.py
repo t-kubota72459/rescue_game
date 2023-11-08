@@ -8,7 +8,7 @@ class Field:
     INV_POS = { v:k for k, v in POS.items() }
 
     # 赤外センサー
-    IR = { 'A':11, 'B':5, 'C':0 }
+    IR = { 'A':11, 'B':5, 'C':6 }
     INV_IR = { v:k for k, v in IR.items() }
 
     # 光電センサー
@@ -23,18 +23,17 @@ class Field:
             GPIO.setup(v, GPIO.IN)
 
         for v in self.IR.values():
-            GPIO.setup(v, GPIO.IN)
-        GPIO.add_event_detect(self.IR['A'], GPIO.FALLING, callback=game.help_A, bouncetime=3000)
-        GPIO.add_event_detect(self.IR['B'], GPIO.FALLING, callback=game.help_B, bouncetime=3000)
-        GPIO.add_event_detect(self.IR['C'], GPIO.FALLING, callback=game.help_C, bouncetime=3000)
+            GPIO.setup(v, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+        ##
+        ## トリガー検出後、10 秒間は反応を抑制する
+        ##
+        GPIO.add_event_detect(self.IR['A'], GPIO.FALLING, callback=game.help_A, bouncetime=10000)
+        GPIO.add_event_detect(self.IR['B'], GPIO.FALLING, callback=game.help_B, bouncetime=10000)
+        GPIO.add_event_detect(self.IR['C'], GPIO.FALLING, callback=game.help_C, bouncetime=10000)
 
         for v in self.PHOTO.values():
             GPIO.setup(v, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-        ## GPIO.add_event_detect(self.PHOTO['GOAL'], GPIO.FALLING, callback=game.goal, bouncetime=20000)
-        ## GPIO.add_event_detect(17, GPIO.FALLING, callback=my_callback, bouncetime=100)
-        ## GPIO.add_event_detect(27, GPIO.FALLING, callback=my_callback, bouncetime=100)
-        ## GPIO.add_event_detect(22, GPIO.FALLING, callback=my_callback, bouncetime=100)
 
         self.life = 'A'
 

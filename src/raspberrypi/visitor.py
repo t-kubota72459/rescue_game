@@ -1,29 +1,27 @@
 import os
 
-FILENAME = "./visitor.txt"
-
-def setup():
-    with open(FILENAME, mode='w') as f:
+def setup(fn):
+    with open(fn, mode='w') as f:
         f.write("0\n")
     return 0
 
-def oneup():
-    num = read() + 1
-    write(num)
+def oneup(fn):
+    num = read(fn) + 1
+    write(fn, num)
     return num
 
-def read():
-    if os.path.isfile(FILENAME):
-        with open(FILENAME) as f:
+def read(fn):
+    if os.path.isfile(fn):
+        with open(fn) as f:
             ln = f.readline()
         return int(ln)
     else:
-        return setup()
+        return setup(fn)
 
-def write(num):
-    if os.path.isfile(FILENAME):
-        with open(FILENAME, "w") as f:
+def write(fn, num):
+    if os.path.isfile(fn):
+        with open(fn, "w") as f:
             f.write(f"{str(num)}" + "\n")
 
 if __name__ == "__main__":
-    print(oneup())
+    print(oneup("./visitor_test.txt"))

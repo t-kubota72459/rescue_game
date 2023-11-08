@@ -4,10 +4,10 @@ import arduino
 
 class Game:
     rescue_time = 120
-    search_result = [0, 0, 0]
     name_table = ["フィールドＡ", "フィールドＢ", "フィールドＣ"]
 
     def __init__(self):
+        self.search_result = [0, 0, 0]
         self.field = field.Field(self)
         self.field.set_life()
 
@@ -19,7 +19,7 @@ class Game:
 
     def help_A(self, channel):
         ''' called from event trigger sensor'''
-        print("caught trigger")
+        print("caught trigger A")
         if self.field.need_help(channel):
             self.search_result[0] = 1
             arduino.play(7)
@@ -29,7 +29,7 @@ class Game:
 
     def help_B(self, channel):
         ''' called from event trigger sensor'''
-        print("caught trigger")
+        print("caught trigger B")
         if self.field.need_help(channel):
             self.search_result[1] = 1
             arduino.play(8)
@@ -39,7 +39,7 @@ class Game:
 
     def help_C(self, channel):
         ''' called from event trigger sensor'''
-        print("caught trigger")
+        print("caught trigger C")
         if self.field.need_help(channel):
             self.search_result[2] = 1
             arduino.play(9)
@@ -57,17 +57,33 @@ class Game:
         return self.field.is_succeeded()
 
     def search(self):
+        # 生命反応なし
         try:
             pos = self.search_result.index(-1)
-            self.serach_result[pos] = 0
-            return (name_table[pos], "なし")
-        except: ValueError
-            try:
-                pos = self.search_result.index(1)
-                self.serach_result[pos] = 0
-                return (name_table[pos], "あり！！")
-            except: ValueError
-                return (None, "")
+            self.search_result[pos] = 0
+            s = ""
+            for v in self.search_result:
+                s += str(v) + ","
+            print("game.search_result:" + s)
+            return (self.name_table[pos], "なし")
+        except ValueError:
+            pass
+
+        # 生命反応あり
+        try:
+            pos = self.search_result.index(1)
+            self.search_result[pos] = 0
+            s = ""
+            for v in self.search_result:
+                s += str(v) + ","
+            print("game.search_result:" + s)
+            return (self.name_table[pos], "あり！！")
+        except ValueError:
+            s = ""
+            for v in self.search_result:
+                s += str(v) + ","
+            print("game.search_result:" + s)
+            return (None, "")
 
     def run(self):
         arduino.play(1)
@@ -89,6 +105,7 @@ class Game:
         arduino.play(5)
     
     def cleanup(self):
+        self.search_result = [0, 0, 0]
         self.field.cleanup()
 
 if __name__ == '__main__':

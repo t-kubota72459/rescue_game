@@ -77,7 +77,7 @@ def update_display(_min, _sec):
 
 def init_display():
     if not game.is_ready():
-        sg.popup_ok("セッティングを確認してください\n" + game.field.dump(), font=("", 16))
+        sg.popup_ok("セッティングを確認してください\n" + game.field.dump(), font=("", 16), no_titlebar=True, keep_on_top=True)
         return False
 
     window["-NAME-"].update( f'がんばれ！ {values["-INPUT1-"]}隊員！') 
@@ -141,7 +141,7 @@ while True:
     if stat == s.INIT:
         if event == "-START-":
             game.run()
-            sg.popup_auto_close("救助開始！\n", auto_close=True, auto_close_duration=1, font=("", 32))
+            sg.popup_auto_close("救助開始！\n", font=("", 32), auto_close=True, auto_close_duration=1, non_blocking=True, keep_on_top=True)
             stat = s.READY
 
     ##
@@ -162,7 +162,7 @@ while True:
 
         (pos, alive) = game.search()
         if pos is not None:
-            sg.popup_auto_close(f"{pos} に生命反応 {alive}", auto_close=True, auto_close_duration=2, font("", 32), non_blocking=True, no_titlebar=True, keep_on_top=True)
+            sg.popup_auto_close(f'{pos} に生命反応 {alive}', font=("", 32), auto_close=True, auto_close_duration=2, non_blocking=True, no_titlebar=True, keep_on_top=True)
 
         if remaining_time <= 0:
             stat = s.FIN_TIMEOVER
@@ -177,7 +177,7 @@ while True:
     ##
     if stat == s.FIN_TIMEOVER:
         game.over()
-        sg.popup_auto_close("ざんねん！！\nゲームオーバー！！\n", auto_close=True, auto_close_duration=3, font=("", 32))
+        sg.popup_auto_close("ざんねん！！\nゲームオーバー！！\n", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keep_on_top=True)
         update_recode(max(remaining_time, 0))
 
     ##
@@ -185,7 +185,7 @@ while True:
     ##
     if stat == s.FIN_SUCC:
         game.goal()
-        sg.popup_auto_close("ゲームクリア！！\nおめでとう！！\n", auto_close=True, auto_close_duration=3, font=("", 32))
+        sg.popup_auto_close("ゲームクリア！！\nおめでとう！！\n", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keep_on_top=True)
         update_recode(max(remaining_time, 0))
 
     ##
@@ -193,7 +193,7 @@ while True:
     ##
     if stat == s.FIN_FAIL:
         game.nogoal()
-        sg.popup_auto_close("ざんねん\nもう一度トライしよう！！", auto_close=True, auto_close_duration=3, font=("", 32))
+        sg.popup_auto_close("ざんねん\nもう一度トライしよう！！", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keeep_on_top=True)
 
     ##
     ## 終了時の共通処理
