@@ -141,7 +141,7 @@ while True:
     if stat == s.INIT:
         if event == "-START-":
             game.run()
-            sg.popup_auto_close("救助開始！\n", font=("", 32), auto_close=True, auto_close_duration=1, non_blocking=True, keep_on_top=True)
+            sg.popup("救助開始！\n", font=("", 32), auto_close=True, auto_close_duration=1, non_blocking=True, keep_on_top=True, button_type=5)
             stat = s.READY
 
     ##
@@ -162,7 +162,7 @@ while True:
 
         (pos, alive) = game.search()
         if pos is not None:
-            sg.popup_auto_close(f'{pos} に生命反応 {alive}', font=("", 32), auto_close=True, auto_close_duration=2, non_blocking=True, no_titlebar=True, keep_on_top=True)
+            sg.popup(f'{pos} に生命反応 {alive}', font=("", 32), auto_close=True, auto_close_duration=3, non_blocking=True, no_titlebar=True, keep_on_top=True, button_type=5)
 
         if remaining_time <= 0:
             stat = s.FIN_TIMEOVER
@@ -177,7 +177,7 @@ while True:
     ##
     if stat == s.FIN_TIMEOVER:
         game.over()
-        sg.popup_auto_close("ざんねん！！\nゲームオーバー！！\n", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keep_on_top=True)
+        sg.popup("ざんねん！！\nゲームオーバー！！\n", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keep_on_top=True, button_type=5)
         update_recode(max(remaining_time, 0))
 
     ##
@@ -185,7 +185,7 @@ while True:
     ##
     if stat == s.FIN_SUCC:
         game.goal()
-        sg.popup_auto_close("ゲームクリア！！\nおめでとう！！\n", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keep_on_top=True)
+        sg.popup("ゲームクリア！！\nおめでとう！！\n", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keep_on_top=True, button_type=5)
         update_recode(max(remaining_time, 0))
 
     ##
@@ -193,7 +193,7 @@ while True:
     ##
     if stat == s.FIN_FAIL:
         game.nogoal()
-        sg.popup_auto_close("ざんねん\nもう一度トライしよう！！", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keeep_on_top=True)
+        sg.popup("ざんねん\nもう一度トライしよう！！", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keeep_on_top=True, button_type=5)
 
     ##
     ## 終了時の共通処理
