@@ -28,7 +28,7 @@ best_recode = { "name": "",
                 "time": 0 }
 
 ## 来場者記録ファイル
-fn = "/home/takaya/proj/rescue_game/src/raspberrypi/visitor.txt"
+fn = "/home/takaya/repos/rescue_game/src/raspberrypi/visitor.txt"
 
 ## 画面デザイン
 sg.theme('LightBlue')
@@ -193,7 +193,7 @@ while True:
     ##
     if stat == s.FIN_FAIL:
         game.nogoal()
-        sg.popup("ざんねん\nもう一度トライしよう！！", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keeep_on_top=True, button_type=5)
+        sg.popup("ざんねん\nもう一度トライしよう！！", font=("", 32), auto_close=True, auto_close_duration=3, no_titlebar=True, keep_on_top=True, button_type=5)
 
     ##
     ## 終了時の共通処理

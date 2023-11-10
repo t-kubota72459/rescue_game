@@ -8,6 +8,7 @@ i2cbus = SMBus(1)
 BACKGROUND = False
 
 def busy():
+    time.sleep(0.1)
     return i2cbus.read_byte(addr)
 
 def down():
@@ -32,10 +33,11 @@ def next():
 
 def stop():
     i2cbus.write_byte(addr, 0x00)
-    time.sleep(0.3)
+    time.sleep(0.1)
 
 def cleanup():
-	pass
+    print("cleanup()")
+    pass
 
 if __name__ == '__main__':
     play(1)

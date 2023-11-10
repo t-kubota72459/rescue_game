@@ -8,7 +8,7 @@ class Field:
     INV_POS = { v:k for k, v in POS.items() }
 
     # 赤外センサー
-    IR = { 'A':11, 'B':5, 'C':6 }
+    IR = { 'A':13, 'B':5, 'C':6 }
     INV_IR = { v:k for k, v in IR.items() }
 
     # 光電センサー

@@ -5,6 +5,7 @@ import arduino
 class Game:
     rescue_time = 120
     name_table = ["フィールドＡ", "フィールドＢ", "フィールドＣ"]
+    sound_table = [7,8,9,3]
 
     def __init__(self):
         self.search_result = [0, 0, 0]
@@ -22,30 +23,24 @@ class Game:
         print("caught trigger A")
         if self.field.need_help(channel):
             self.search_result[0] = 1
-            arduino.play(7)
         else:
             self.search_result[0] = -1
-            arduino.play(3)
 
     def help_B(self, channel):
         ''' called from event trigger sensor'''
         print("caught trigger B")
         if self.field.need_help(channel):
             self.search_result[1] = 1
-            arduino.play(8)
         else:
             self.search_result[1] = -1
-            arduino.play(3)
 
     def help_C(self, channel):
         ''' called from event trigger sensor'''
         print("caught trigger C")
         if self.field.need_help(channel):
             self.search_result[2] = 1
-            arduino.play(9)
         else:
             self.search_result[2] = -1
-            arduino.play(3)
 
     def is_ready(self):
         return self.field.is_ready()
@@ -64,7 +59,10 @@ class Game:
             s = ""
             for v in self.search_result:
                 s += str(v) + ","
-            print("game.search_result:" + s)
+            # print("game.search_result:" + s)
+
+            arduino.play(3)
+
             return (self.name_table[pos], "なし")
         except ValueError:
             pass
@@ -76,13 +74,16 @@ class Game:
             s = ""
             for v in self.search_result:
                 s += str(v) + ","
-            print("game.search_result:" + s)
+            # print("game.search_result:" + s)
+
+            arduino.play(self.sound_table[pos])
+
             return (self.name_table[pos], "あり！！")
         except ValueError:
             s = ""
             for v in self.search_result:
                 s += str(v) + ","
-            print("game.search_result:" + s)
+            # print("game.search_result:" + s)
             return (None, "")
 
     def run(self):
