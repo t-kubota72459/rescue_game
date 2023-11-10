@@ -110,6 +110,10 @@ while True:
 
         if -200 < x < 200 and -250 < y < 250:       ## 静置
             stop(r)
+        elif 500 < x:                               ## 右に傾けた
+            turn_right(r, KMotor.FORWARD, POWER-10)
+        elif x < -500:                              ## 左に傾けた
+            turn_left(r, KMotor.FORWARD, POWER-10)
         elif y < -300:                              ## (頭を) 下に傾けた
             speed = min(int((-y / 1024) * POWER), 100)
             forward(r, speed)
