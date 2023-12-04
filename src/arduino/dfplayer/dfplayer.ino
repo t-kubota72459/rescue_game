@@ -9,6 +9,11 @@ byte c1;                // command
 SoftwareSerial mySoftwareSerial(10, 11);        // IO10をRX, IO11をTXとしてアサイン
 DFRobotDFPlayerMini myDFPlayer;
 
+void request_handler()
+{
+    Wire.write((byte)digitalRead(busy));
+}
+
 void handler(int num_bytes)
 {
     if (num_bytes == 1) {
@@ -16,8 +21,8 @@ void handler(int num_bytes)
         switch (c1) {
             case 0x81: myDFPlayer.volumeDown(); break;
             case 0x82: myDFPlayer.volumeUp(); break;
-            case 0x21: myDFPlayer.previous(); break;
-            case 0x22: myDFPlayer.next(); break;
+            case 0x83: myDFPlayer.previous(); break;
+            case 0x84: myDFPlayer.next(); break;
             case 0x01: myDFPlayer.stop(); break;
             default:
                 if (c1 & 0x40) {
@@ -28,11 +33,14 @@ void handler(int num_bytes)
     }
 }
 
-
 void setup()
 {
     Wire.begin(addr);
+    digitalWrite(SDA, 0);   // deactivate pullups
+    digitalWrite(SCL, 0);   // deactivate pullups
+
     Wire.onReceive(handler);
+    Wire.onRequest(request_handler);
     pinMode(busy, INPUT);
 
     mySoftwareSerial.begin(9600);   // Communicate with DFPlayer
