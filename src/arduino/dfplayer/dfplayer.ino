@@ -3,10 +3,10 @@
 #include "DFRobotDFPlayerMini.h"
 
 const int addr = 0x08;  // slave address
-const int busy = 9;     // busy pin of DFPlayer
+const int busy = 11;    // busy pin of DFPlayer
 byte c1;                // command
 
-SoftwareSerial mySoftwareSerial(10, 11);        // IO10をRX, IO11をTXとしてアサイン
+SoftwareSerial mySoftwareSerial(12, 13); // using 12 as RX and 13 as TX
 DFRobotDFPlayerMini myDFPlayer;
 
 void request_handler()
@@ -66,7 +66,7 @@ void setup()
     myDFPlayer.play(1);
 }
 
-#define DEBUG
+// #define DEBUG
 void loop()
 {
 #ifdef DEBUG
