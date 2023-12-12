@@ -28,7 +28,7 @@ best_recode = { "name": "",
                 "time": 0 }
 
 ## 来場者記録ファイル
-fn = "/home/takaya/repos/rescue_game/src/raspberrypi/visitor.txt"
+fn = "./visitor.txt"
 
 ## 画面デザイン
 sg.theme('LightBlue')
@@ -103,11 +103,11 @@ def update_recode(remaining_time):
 ## 初期状態
 ##
 stat = s.IDLE
-downcounter = 100 # 10 sec. till BGM starts (BGM までの時間)
+idle_cnt = 0
 
 while True:
     event, values = window.read(timeout=100)
-    ## print(stat, event, values)
+    # print(stat, event, values)
 
     ## 終了
     if event == sg.WIN_CLOSED:
@@ -130,10 +130,12 @@ while True:
         elif event == "-STOP-":
             arduino.stop()
         elif event == "__TIMEOUT__":
-            downcounter -= 1
-            if downcounter <= 0 and not arduino.busy():
-                arduino.play(6)
-                downcounter = 100
+            if idle_cnt == 100:
+                idle_cnt = 0
+                if not arduino.busy():
+                    arduino.play(6)
+            else:
+                idle_cnt += 1
 
     ##
     ## GAME START
@@ -149,7 +151,7 @@ while True:
     ##
     if stat == s.READY:
         end_time = time.time() + game.rescue_time
-        if game.field.is_started(): ## Robo moved
+        if game.field.is_started():
             stat = s.ACTIVE
 
     ##
@@ -160,9 +162,14 @@ while True:
         _min, _sec = divmod(max(remaining_time, 0), 60)
         update_display(_min, _sec)
 
-        (pos, alive) = game.search()
-        if pos is not None:
-            sg.popup(f'{pos} に生命反応 {alive}', font=("", 32), auto_close=True, auto_close_duration=3, non_blocking=True, no_titlebar=True, keep_on_top=True, button_type=5)
+        if not game.queue.empty():
+            (pos, hit) = game.queue.get()
+            if hit:
+                game.is_hit(pos)
+                sg.popup(f'フィールド {pos} に生命反応 あり！', font=("", 32), auto_close=True, auto_close_duration=3, non_blocking=True, no_titlebar=True, keep_on_top=True, button_type=5)
+            else:
+                game.is_missed(pos)
+                sg.popup(f'フィールド {pos} に生命反応 なし', font=("", 32), auto_close=True, auto_close_duration=3, non_blocking=True, no_titlebar=True, keep_on_top=True, button_type=5)
 
         if remaining_time <= 0:
             stat = s.FIN_TIMEOVER
@@ -200,7 +207,7 @@ while True:
     ##
     if stat in (s.FIN_TIMEOVER, s.FIN_SUCC, s.FIN_FAIL):
         window['-VISITOR-'].update(str(visitor.oneup(fn)))
-        downcounter = 100
+        time.sleep(5)
         stat = s.IDLE
 
 repeater.cancel()

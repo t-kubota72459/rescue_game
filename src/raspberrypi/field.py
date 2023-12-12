@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import random
 import game
+import time
 
 class Field:
     # 近接センサー
@@ -8,34 +9,50 @@ class Field:
     INV_POS = { v:k for k, v in POS.items() }
 
     # 赤外センサー
-    IR = { 'A':13, 'B':5, 'C':6 }
+    IR = { 'A':13, 'B':26, 'C':6 }
     INV_IR = { v:k for k, v in IR.items() }
 
     # 光電センサー
     PHOTO = {'START':4, 'GOAL':9 }
     INV_PHOTO = { v:k for k, v in PHOTO.items() }
 
-    def __init__(self, game):
+    def __init__(self, queue):
         """ Initializing sensors on the field. """
-
         GPIO.setmode(GPIO.BCM)
-        for v in self.POS.values():
-            GPIO.setup(v, GPIO.IN)
+        for _ in self.POS.values():
+            GPIO.setup(_, GPIO.IN)
 
-        for v in self.IR.values():
-            GPIO.setup(v, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        for _ in self.IR.values():
+            GPIO.setup(_, GPIO.IN)
+
+        for _ in self.PHOTO.values():
+            GPIO.setup(_, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
         ##
-        ## トリガー検出後、10 秒間は反応を抑制する
+        ## トリガー検出後、2 秒間は反応を抑制する
         ##
-        GPIO.add_event_detect(self.IR['A'], GPIO.FALLING, callback=game.help_A, bouncetime=10000)
-        GPIO.add_event_detect(self.IR['B'], GPIO.FALLING, callback=game.help_B, bouncetime=10000)
-        GPIO.add_event_detect(self.IR['C'], GPIO.FALLING, callback=game.help_C, bouncetime=10000)
-
-        for v in self.PHOTO.values():
-            GPIO.setup(v, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(self.IR['A'], GPIO.FALLING, callback=self.mycallback, bouncetime=2000)
+        GPIO.add_event_detect(self.IR['B'], GPIO.FALLING, callback=self.mycallback, bouncetime=2000)
+        GPIO.add_event_detect(self.IR['C'], GPIO.FALLING, callback=self.mycallback, bouncetime=2000)
 
         self.life = 'A'
+        self.queue = queue
+
+    def measure5ms(self, channel):
+        start_time = time.perf_counter()
+        upto_time = start_time + 0.005  ## low signal keeps for 5ms
+        while GPIO.input(channel) == 0:
+            if upto_time < time.perf_counter():
+                return True
+            time.sleep(1e-3)
+        return False
+
+    def mycallback(self, channel):
+        if self.measure5ms(channel):
+            if self.need_help(channel):
+                self.queue.put( (Field.INV_IR[channel], True) )
+            else:
+                self.queue.put( (Field.INV_IR[channel], False) )
 
     def set_life(self):
         self.life = random.sample(['A', 'B', 'C'], 1)[0]
@@ -83,3 +100,11 @@ class Field:
     def cleanup(self):
         for v in self.IR.values():
             GPIO.remove_event_detect(v)
+
+if __name__ == '__main__':
+    import time
+    GPIO.cleanup()
+    g = game.Game()
+    while True:
+        print("game is ready?:", g.is_ready())
+        time.sleep(1)
