@@ -20,7 +20,7 @@ class Game:
         return self.field.life
 
     def is_started(self):
-        return self.filed.is_started()
+        return self.field.is_started()
 
     def is_ready(self):
         return self.field.is_ready()
