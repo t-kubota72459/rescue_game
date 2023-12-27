@@ -151,7 +151,7 @@ while True:
     ##
     if stat == s.READY:
         end_time = time.time() + game.rescue_time
-        if game.field.is_started():
+        if game.is_started():
             stat = s.ACTIVE
 
     ##
@@ -206,6 +206,7 @@ while True:
     ## 終了時の共通処理
     ##
     if stat in (s.FIN_TIMEOVER, s.FIN_SUCC, s.FIN_FAIL):
+        game.cleanup()
         window['-VISITOR-'].update(str(visitor.oneup(fn)))
         time.sleep(5)
         stat = s.IDLE

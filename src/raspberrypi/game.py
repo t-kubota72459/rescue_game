@@ -19,6 +19,9 @@ class Game:
     def get_life(self):
         return self.field.life
 
+    def is_started(self):
+        return self.filed.is_started()
+
     def is_ready(self):
         return self.field.is_ready()
 
@@ -28,7 +31,6 @@ class Game:
     def is_succeeded(self):
         return self.field.is_succeeded()
 
-    
     def is_hit(self, pos):
         print(pos)
         arduino.play(self.sound_table[pos])
