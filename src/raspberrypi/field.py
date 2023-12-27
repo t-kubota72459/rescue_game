@@ -27,14 +27,6 @@ class Field:
 
         for _ in self.PHOTO.values():
             GPIO.setup(_, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-        ##
-        ## トリガー検出後、2 秒間は反応を抑制する
-        ##
-        GPIO.add_event_detect(self.IR['A'], GPIO.FALLING, callback=self.mycallback, bouncetime=2000)
-        GPIO.add_event_detect(self.IR['B'], GPIO.FALLING, callback=self.mycallback, bouncetime=2000)
-        GPIO.add_event_detect(self.IR['C'], GPIO.FALLING, callback=self.mycallback, bouncetime=2000)
-
         self.life = 'A'
         self.queue = queue
 
@@ -81,7 +73,13 @@ class Field:
 
     def is_started(self):
         """ triggerd start sensor """
-        return GPIO.input( self.PHOTO['START'] ) == GPIO.HIGH
+        if GPIO.input( self.PHOTO['START'] ) == GPIO.HIGH:
+            GPIO.add_event_detect(self.IR['A'], GPIO.FALLING, callback=self.mycallback, bouncetime=2000)
+            GPIO.add_event_detect(self.IR['B'], GPIO.FALLING, callback=self.mycallback, bouncetime=2000)
+            GPIO.add_event_detect(self.IR['C'], GPIO.FALLING, callback=self.mycallback, bouncetime=2000)
+            return True
+        else:
+            return False
 
     def is_finished(self):
         """ triggerd goal sensor """
